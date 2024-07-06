@@ -2,6 +2,7 @@ package translation_service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -39,6 +40,9 @@ func (m *client[ID, V, A]) GetTranslation(c context.Context, key ID) (Response[I
 	)
 
 	err := m.coll.FindOne(c, filter).Decode(&result)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		err = TextNotFound
+	}
 
 	return result, err
 }
