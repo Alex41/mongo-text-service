@@ -6,8 +6,9 @@ import (
 )
 
 type TranslationService[ID comparable, V, A any] interface {
+	GetTranslation(context.Context, ID, Language) (*V, error)
 	GetAllTranslations(_ context.Context, filter bson.M) ([]Response[ID, V, A], error)
-	GetTranslation(context.Context, ID) (Response[ID, V, A], error)
+	GetTranslations(context.Context, ID) (Response[ID, V, A], error)
 	SetAdditional(context.Context, ID, A) error
 	Upsert(context.Context, ID, Language, V) error
 	UpsertAll(context.Context, ID, map[Language]V, A) error

@@ -33,7 +33,7 @@ func (t translation[ID, V, A]) GetAdditional() A {
 	return t.AddFields
 }
 
-func (m *client[ID, V, A]) GetTranslation(c context.Context, key ID) (Response[ID, V, A], error) {
+func (m *client[ID, V, A]) GetTranslations(c context.Context, key ID) (Response[ID, V, A], error) {
 	var (
 		filter = bson.M{"_id": key}
 		result translation[ID, V, A]
@@ -102,6 +102,29 @@ func (m *client[ID, V, A]) SetAdditional(c context.Context, key ID, a A) error {
 func (m *client[ID, V, A]) Delete(c context.Context, key ID) error {
 	_, err := m.coll.DeleteOne(c, bson.M{"_id": key})
 	return err
+}
+
+func (m *client[ID, V, A]) GetTranslation(c context.Context, key ID, lang Language) (*V, error) {
+	var (
+		filter = bson.M{
+			"_id":                       key,
+			fmt.Sprintf("trs.%s", lang): bson.M{"$exists": true},
+		}
+		result translation[ID, V, A]
+	)
+
+	err := m.coll.FindOne(c, filter).Decode(&result)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, TextNotFound
+	}
+
+	// todo: use projection
+	value, exists := result.Value[lang]
+	if !exists {
+		return nil, TextNotFound
+	}
+
+	return &value, err
 }
 
 //goland:noinspection GoUnusedExportedFunction
