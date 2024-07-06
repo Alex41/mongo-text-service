@@ -100,6 +100,7 @@ func (m *client[ID, V, A]) Delete(c context.Context, key ID) error {
 	return err
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewClient[ID comparable, V, A any](coll *mongo.Collection) TranslationService[ID, V, A] {
 	return &client[ID, V, A]{coll: coll}
 }
